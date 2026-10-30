@@ -34,13 +34,15 @@ establish live game behavior, backend correctness or official Hub acceptance.
   src, for their User-Agent strings.
 - Offline preflight and ZIP member/CRC checks passed for the preparation package.
 
-## Still required before public Plugin Hub submission
+## Known limits and follow-up validation
 
 No authenticated production API test, live game-client test or multiplayer
 completion-deduplication test was performed in this preparation task. The
-backend matcher is outside this repository. Validate the scenarios in
-SUBMISSION_LT.md and complete service-side retention/deletion information
-referenced by PRIVACY.md. No production site or database changes were made.
+backend matcher is outside this repository. At the owner's request, live
+multiplayer testing will not block opening a Plugin Hub review request. The
+scenarios in SUBMISSION.md remain recommended follow-up tests. Service-side
+retention/deletion information is outside the client audit described by
+PRIVACY.md. No production site or database changes were made.
 
 Public source availability and successful CI are not Plugin Hub approval.
 The official RuneLite Plugin Hub PR has not been submitted.

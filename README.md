@@ -20,7 +20,8 @@ It is not yet published in RuneLite Plugin Hub.
 Raid reports belong to an explicitly selected session. Death does not complete a
 raid; exiting or losing connection is not success. Combining different players'
 reports happens on the Lobbykin service, outside this repository. Live
-multiplayer validation remains required before submission.
+multiplayer behavior and cross-client completion deduplication have not yet been
+verified for this candidate. Reports may be incomplete or inaccurate.
 
 ## Installation after approval
 
@@ -66,12 +67,12 @@ Plugin Hub replaces this local build under `build=standard`. There are no added
 main-runtime dependencies beyond RuneLite's transitive dependencies. Tests use
 JUnit and the RuneLite development client. The JAR is not a standalone program.
 
-See [SUBMISSION_LT.md](SUBMISSION_LT.md) for release gates and submission steps,
+See [SUBMISSION.md](SUBMISSION.md) for submission steps and validation limits,
 and [VALIDATION.md](VALIDATION.md) for the actual checks completed here.
 
 ## Support and license
 
-After creating the public repository, use its GitHub Issues for bug reports.
+Use this repository's GitHub Issues for bug reports.
 Include version, raid/mode, steps and expected/actual behavior; omit credentials.
 Project code uses BSD-2-Clause ([LICENSE](LICENSE)); wrapper licensing and asset
 provenance are in [NOTICE.md](NOTICE.md). Not affiliated with or approved by

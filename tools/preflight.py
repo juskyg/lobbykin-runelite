@@ -6,7 +6,7 @@ import struct
 
 root = Path(__file__).resolve().parents[1]
 required = ["LICENSE", "LICENSE-Gradle.txt", "NOTICE.md", "README.md", "PRIVACY.md",
-            "SECURITY.md", "SUBMISSION_LT.md", "VALIDATION.md", "gradlew", "gradlew.bat",
+            "SECURITY.md", "SUBMISSION.md", "VALIDATION.md", "gradlew", "gradlew.bat",
             "gradle/wrapper/gradle-wrapper.jar", "gradle/wrapper/gradle-wrapper.properties",
             "icon.png", ".github/workflows/build.yml"]
 for name in required:
