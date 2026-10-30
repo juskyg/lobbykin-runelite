@@ -7,3 +7,10 @@ prebuilt release JAR. No new raid or world-hop behavior is introduced.
 
 This source candidate still needs a full build and live acceptance before
 submission; it is not an approved Plugin Hub release.
+
+## Plugin Hub review compatibility fix
+
+The official packager rejected direct Gson construction in production code.
+Use RuneLite's injected Gson for browser pairing and session response parsing.
+Tests provide their parser explicitly; offline preflight rejects direct Gson
+construction in main sources. No raid detection or authorization rules change.

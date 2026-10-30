@@ -21,9 +21,9 @@ final class SessionSnapshot
     static final class Tracking { List<Participant> participants=java.util.Collections.emptyList(); int completed_runs; Integer deaths,failed_runs,interrupted_runs; List<Run> runs=java.util.Collections.emptyList(); String disclaimer; }
     static final class Run { String id,raid,status,started_at,completed_at,duration_source; int sequence,world,report_count; Integer duration_seconds; List<String> reporters=java.util.Collections.emptyList(); }
 
-    static SessionSnapshot parse(String json)
+    static SessionSnapshot parse(Gson gson, String json)
     {
-        SessionSnapshot result = new Gson().fromJson(json, SessionSnapshot.class);
+        SessionSnapshot result = gson.fromJson(json, SessionSnapshot.class);
         if (result == null || !"sessions:read".equals(result.scope)
             || result.account == null || result.account.length() > 120
             || result.sessions == null || result.sessions.size() > 30)

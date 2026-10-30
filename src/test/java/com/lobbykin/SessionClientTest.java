@@ -45,7 +45,7 @@ public class SessionClientTest
     @Test
     public void revocationDisconnectsAndResponseCannotSupplyAnExternalLink() throws Exception
     {
-        assertThrows(IllegalArgumentException.class, () -> SessionSnapshot.parse("{\"account\":\"a\",\"scope\":\"sessions:read\",\"sessions\":[{\"id\":\"https://evil.invalid\",\"title\":\"x\"}]}"));
+        assertThrows(IllegalArgumentException.class, () -> SessionSnapshot.parse(new com.google.gson.Gson(), "{\"account\":\"a\",\"scope\":\"sessions:read\",\"sessions\":[{\"id\":\"https://evil.invalid\",\"title\":\"x\"}]}"));
         HttpServer server = server(401, "{}", new AtomicReference<>());
         try
         {
@@ -173,7 +173,7 @@ public class SessionClientTest
 
     private static SessionClient client(HttpServer server)
     {
-        return new SessionClient(new OkHttpClient(), "http://127.0.0.1:" + server.getAddress().getPort() + "/sessions");
+        return new SessionClient(new OkHttpClient(),new com.google.gson.Gson(), "http://127.0.0.1:" + server.getAddress().getPort() + "/sessions");
     }
 
     private static HttpServer server(int status, String body, AtomicReference<String> auth) throws Exception

@@ -1,6 +1,7 @@
 package com.lobbykin;
 
 import javax.inject.Inject;
+import com.google.gson.Gson;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
@@ -41,6 +42,7 @@ public class LobbykinPlugin extends Plugin
     @Inject private ClientThread clientThread;
     @Inject private ClientToolbar toolbar;
     @Inject private OkHttpClient http;
+    @Inject private Gson gson;
     @Inject private Notifier notifier;
     @Inject private WorldService worldService;
     @Inject private ScheduledExecutorService executor;
@@ -60,7 +62,7 @@ public class LobbykinPlugin extends Plugin
     {
         notifications=new NotificationPlanner();
         hopper=new WorldHopController(client,text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.showHopStatus(text));});
-        pairing=new BrowserPairing(http,executor,url->LinkBrowser.browse(url),text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.showPairing(text));},token->{SessionConnection c=connection;if(c!=null)c.connect(token);},text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.pairingFailed(text));});
+        pairing=new BrowserPairing(http,gson,executor,url->LinkBrowser.browse(url),text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.showPairing(text));},token->{SessionConnection c=connection;if(c!=null)c.connect(token);},text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.pairingFailed(text));});
         tracker=new RaidTracker(report->{SessionConnection c=connection;if(c!=null)c.report(report);},text->{
             LobbykinPanel p=panel;RaidTracker t=tracker;
             if(p!=null)SwingUtilities.invokeLater(()->{if(panel==p)p.showTrackingStatus(t==null?null:t.selectedGroup(),text,t!=null&&t.activeRun());});
@@ -79,7 +81,7 @@ public class LobbykinPlugin extends Plugin
             panel.configurePairCancel(()->{if(pairing!=null)pairing.cancel();});
             panel.configureV7(()->{if(pairing!=null)pairing.start();},this::hopToWorld);
             LobbykinPanel current = panel;
-            connection = new SessionConnection(new SessionClient(http), new SessionConnection.View()
+            connection = new SessionConnection(new SessionClient(http,gson), new SessionConnection.View()
             {
                 private void show(Consumer<LobbykinPanel> action)
                 {

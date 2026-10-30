@@ -11,11 +11,11 @@ import okhttp3.*;
 
 /** Browser approval with a private proof. Raw credentials never enter a URL or browser. */
 final class BrowserPairing {
- private final OkHttpClient http;private final ScheduledExecutorService executor;
+ private final OkHttpClient http;private final Gson gson;private final ScheduledExecutorService executor;
  private final Consumer<String> open,status,connected,failure;private final String endpoint;
  private Call pending;private ScheduledFuture<?> timer;private long generation;private String id,verifier,token;private Instant expires;
- BrowserPairing(OkHttpClient http,ScheduledExecutorService executor,Consumer<String> open,Consumer<String> status,Consumer<String> connected,Consumer<String> failure){this(http,executor,open,status,connected,failure,"https://lobbykin.com/api/runelite/pair/");}
- BrowserPairing(OkHttpClient http,ScheduledExecutorService executor,Consumer<String> open,Consumer<String> status,Consumer<String> connected,Consumer<String> failure,String endpoint){this.http=http.newBuilder().followRedirects(false).followSslRedirects(false).callTimeout(10,TimeUnit.SECONDS).build();this.executor=executor;this.open=open;this.status=status;this.connected=connected;this.failure=failure;this.endpoint=endpoint;}
+ BrowserPairing(OkHttpClient http,Gson gson,ScheduledExecutorService executor,Consumer<String> open,Consumer<String> status,Consumer<String> connected,Consumer<String> failure){this(http,gson,executor,open,status,connected,failure,"https://lobbykin.com/api/runelite/pair/");}
+ BrowserPairing(OkHttpClient http,Gson gson,ScheduledExecutorService executor,Consumer<String> open,Consumer<String> status,Consumer<String> connected,Consumer<String> failure,String endpoint){this.gson=java.util.Objects.requireNonNull(gson);this.http=http.newBuilder().followRedirects(false).followSslRedirects(false).callTimeout(10,TimeUnit.SECONDS).build();this.executor=executor;this.open=open;this.status=status;this.connected=connected;this.failure=failure;this.endpoint=endpoint;}
  synchronized void start(){
   cancel();long expected=generation;id=UUID.randomUUID().toString();verifier=random();token="lk_rl_"+random();expires=Instant.now().plusSeconds(300);status.accept("Opening secure Lobbykin connection…");
   JsonObject body=new JsonObject();body.addProperty("id",id);body.addProperty("challenge",hash(verifier));body.addProperty("token_hash",hash(token));
@@ -42,7 +42,7 @@ final class BrowserPairing {
    public void onResponse(Call call,Response response){try(Response result=response){
     StringBuilder text=new StringBuilder();if(!result.isSuccessful()||result.body()==null||result.body().contentLength()>4096)throw new IOException();
     try(Reader reader=result.body().charStream()){char[] buffer=new char[1024];int count;while((count=reader.read(buffer))!=-1){if(text.length()+count>4096)throw new IOException();text.append(buffer,0,count);}}
-    JsonObject data=new Gson().fromJson(text.toString(),JsonObject.class);
+    JsonObject data=gson.fromJson(text.toString(),JsonObject.class);
     synchronized(BrowserPairing.this){if(expected!=generation)return;pending=null;success.accept(data);}
    }catch(Exception error){synchronized(BrowserPairing.this){if(expected!=generation)return;pending=null;if(!retry||response.code()==400||response.code()==401)fail("Could not complete browser approval. Start the connection again.");}}}
   });

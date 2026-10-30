@@ -2,6 +2,7 @@ package com.lobbykin;
 
 import java.io.IOException;
 import com.google.gson.JsonObject;
+import com.google.gson.Gson;
 import java.util.UUID;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -17,19 +18,21 @@ import okhttp3.Response;
 final class SessionClient
 {
     private final OkHttpClient client;
+    private final Gson gson;
     private final String url;
 
-    SessionClient(OkHttpClient client)
+    SessionClient(OkHttpClient client, Gson gson)
     {
-        this(client, "https://lobbykin.com/api/runelite/sessions");
+        this(client, gson, "https://lobbykin.com/api/runelite/sessions");
     }
 
     // Endpoint override is package-private for local tests, never a user setting.
-    SessionClient(OkHttpClient client, String url)
+    SessionClient(OkHttpClient client, Gson gson, String url)
     {
         this.client = client.newBuilder().followRedirects(false).followSslRedirects(false)
             .callTimeout(10, TimeUnit.SECONDS).build();
         this.url = url;
+        this.gson = java.util.Objects.requireNonNull(gson);
     }
 
     interface Listener
@@ -126,7 +129,7 @@ final class SessionClient
                             text.append(buffer, 0, count);
                         }
                     }
-                    listener.success(SessionSnapshot.parse(text.toString()));
+                    listener.success(SessionSnapshot.parse(gson, text.toString()));
                 }
                 catch (Exception error)
                 {

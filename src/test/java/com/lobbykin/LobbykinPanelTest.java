@@ -70,9 +70,9 @@ public class LobbykinPanelTest
             java.util.concurrent.atomic.AtomicReference<Boolean> requested = new java.util.concurrent.atomic.AtomicReference<>();
             LobbykinPanel panel = new LobbykinPanel(() -> {}, () -> {}, token -> {}, () -> {}, () -> {}, id -> {}, (id, desired) -> requested.set(desired));
             String base = "{\"account\":\"Player\",\"scope\":\"sessions:read\",\"sessions\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"title\":\"My session\",\"my_ready\":false,\"can_set_ready\":false}]}";
-            panel.showSessions(SessionSnapshot.parse(base), java.time.Instant.now());
+            panel.showSessions(SessionSnapshot.parse(new com.google.gson.Gson(), base), java.time.Instant.now());
             assertFalse(components(panel).stream().anyMatch(c -> c instanceof JButton && ((JButton)c).getText().equals("Mark ready")));
-            panel.showSessions(SessionSnapshot.parse(base.replace("can_set_ready\":false", "can_set_ready\":true")), java.time.Instant.now());
+            panel.showSessions(SessionSnapshot.parse(new com.google.gson.Gson(), base.replace("can_set_ready\":false", "can_set_ready\":true")), java.time.Instant.now());
             JButton button = (JButton)components(panel).stream().filter(c -> c instanceof JButton && ((JButton)c).getText().equals("Mark ready")).findFirst().get();
             button.doClick();
             assertEquals(Boolean.TRUE, requested.get());
@@ -92,7 +92,7 @@ public class LobbykinPanelTest
             java.util.concurrent.atomic.AtomicReference<Boolean> accepted=new java.util.concurrent.atomic.AtomicReference<>();
             LobbykinPanel panel=new LobbykinPanel(()->{});panel.configureV6((id,value)->accepted.set(value),session->{});
             String json="{\"account\":\"Player\",\"scope\":\"sessions:read\",\"sessions\":[{\"id\":\"11111111-1111-4111-8111-111111111111\",\"title\":\"Offer\",\"my_status\":\"host\",\"can_reply_offer\":true,\"offer_until\":\""+java.time.Instant.now().plusSeconds(120)+"\",\"can_track\":true}]}";
-            panel.showSessions(SessionSnapshot.parse(json),java.time.Instant.now());
+            panel.showSessions(SessionSnapshot.parse(new com.google.gson.Gson(), json),java.time.Instant.now());
             JButton offer=(JButton)components(panel).stream().filter(c->c instanceof JButton&&((JButton)c).getText().startsWith("Accept place")).findFirst().get();
             assertTrue(components(panel).stream().anyMatch(c->c instanceof JButton&&((JButton)c).getText().equals("Track this session")));
             offer.doClick();assertEquals(Boolean.TRUE,accepted.get());assertFalse(offer.isEnabled());panel.showError("Unavailable");assertFalse(offer.isEnabled());panel.showDisconnected("Disconnected");panel.dispose();
