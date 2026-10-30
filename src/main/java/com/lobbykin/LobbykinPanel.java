@@ -94,7 +94,6 @@ final class LobbykinPanel extends PluginPanel {
         try{return !Instant.parse(s.start_at).isAfter(now);}catch(Exception error){return false;}
     }
     private void render(){
-        Object focusKey=KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner() instanceof JComponent?((JComponent)KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner()).getClientProperty("focusKey"):null;
         int savedScroll=getScrollPane()==null?0:getScrollPane().getVerticalScrollBar().getValue();
         sessions.removeAll();actionButtons.clear();offers.clear();deadlineTimer.stop();Instant now=Instant.now();
         List<SessionSnapshot.Session> active=new ArrayList<>(),scheduled=new ArrayList<>(),applications=new ArrayList<>();
@@ -117,7 +116,6 @@ final class LobbykinPanel extends PluginPanel {
         }
         if(!data.notifications.isEmpty()){JPanel updates=stack();for(SessionSnapshot.Update update:data.notifications.subList(0,Math.min(5,data.notifications.size()))){updates.add(bold(update.title));updates.add(note(update.body));}sessions.add(disclosure("updates","Updates ("+data.notifications.size()+")",updates));}
         updateDeadlines();deadlineTimer.start();if(loading)disableActions();revalidate();repaint();
-        if(focusKey!=null)restoreFocus(this,focusKey);
         SwingUtilities.invokeLater(()->{if(getScrollPane()!=null)getScrollPane().getVerticalScrollBar().setValue(savedScroll);});
     }
     private JPanel card(SessionSnapshot.Session s,boolean current){
@@ -131,7 +129,7 @@ final class LobbykinPanel extends PluginPanel {
         if(current){JLabel phase=label(phaseLabel(s.raid_phase));phase.setForeground("started".equals(s.raid_phase)?TEAL:YELLOW);phase.setFont(phase.getFont().deriveFont(Font.BOLD,13f));card.add(phase);}
         else card.add(note((s.start_at==null?"Playing now":"Starts "+date(s.start_at))+" · "+value(s.my_status)));
         JPanel worldRow=new JPanel(new BorderLayout(5,0));worldRow.setOpaque(false);worldRow.add(label("World "+value(s.world)),BorderLayout.WEST);
-        if(s.world!=null&&!pinned){JButton hop=button(localWorld==s.world&&localName!=null?"You are here":"Hop to "+s.world,false,()->hopAction.accept(s.world));hop.setEnabled(localName!=null&&localWorld!=s.world);if(localName!=null&&localWorld!=s.world)actionButtons.add(hop);hop.putClientProperty("focusKey",s.id+":hop");worldRow.add(hop,BorderLayout.EAST);}card.add(worldRow);
+        if(s.world!=null&&!pinned){JButton hop=button(localWorld==s.world&&localName!=null?"You are here":"Hop to "+s.world,false,()->hopAction.accept(s.world));hop.setEnabled(localName!=null&&localWorld!=s.world);if(localName!=null&&localWorld!=s.world)actionButtons.add(hop);worldRow.add(hop,BorderLayout.EAST);}card.add(worldRow);
         if(current&&s.tracking!=null){
             JPanel totals=new JPanel(new VerticalStackLayout(4));totals.setBackground(BACKGROUND);totals.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
             String[] labels={"Deaths","Failed / left","Completed"};String[] values={value(s.tracking.deaths),value(s.tracking.failed_runs),String.valueOf(s.tracking.completed_runs)};
@@ -147,7 +145,7 @@ final class LobbykinPanel extends PluginPanel {
             else{card.add(heading("PARTY · "+value(s.ready_count)+" / "+value(s.team_size)+" READY"));card.add(roster);}
         }else if(s.ready_count!=null)card.add(note("Ready: "+s.ready_count+" / "+s.team_size+" · roster unavailable"));
         JPanel details=stack();
-        if(!pinned&&s.can_set_ready&&s.my_ready!=null){boolean desired=!s.my_ready;JButton ready=button(desired?"Mark ready":"Mark not ready",desired,()->{disableActions();readyAction.accept(s.id,desired);});ready.putClientProperty("focusKey",s.id+":ready");actionButtons.add(ready);if(current&&"started".equals(s.raid_phase))details.add(ready);else card.add(ready);}
+        if(!pinned&&s.can_set_ready&&s.my_ready!=null){boolean desired=!s.my_ready;JButton ready=button(desired?"Mark ready":"Mark not ready",desired,()->{disableActions();readyAction.accept(s.id,desired);});actionButtons.add(ready);if(current&&"started".equals(s.raid_phase))details.add(ready);else card.add(ready);}
         if(s.can_reply_offer&&s.offer_until!=null)try{Instant until=Instant.parse(s.offer_until);JButton accept=button("Accept place",true,()->{disableActions();offerAction.accept(s.id,true);}),decline=button("Decline offer",false,()->{disableActions();offerAction.accept(s.id,false);});accept.setEnabled(until.isAfter(Instant.now()));decline.setEnabled(until.isAfter(Instant.now()));decline.putClientProperty("decline",true);offers.put(accept,until);offers.put(decline,until);actionButtons.add(accept);actionButtons.add(decline);card.add(accept);card.add(decline);}catch(Exception ignored){}
         if(current){
             boolean armed=s.id.equals(trackedGroup),wrongWorld=s.world!=null&&localName!=null&&localWorld!=s.world;
@@ -155,7 +153,7 @@ final class LobbykinPanel extends PluginPanel {
             state.setForeground(armed?TEAL:YELLOW);card.add(state);
             if(wrongWorld) {JTextArea warning=note("Wrong world: you are on "+localWorld+". This group uses "+s.world+". Hop first to track this session.");warning.setForeground(YELLOW);card.add(warning);}
             if(pinned)card.add(note("Session temporarily unavailable. Keeping this active attempt; server confirmation is required. Ready and Hop are disabled."));
-            if(s.can_track||armed){JButton track=button(armed?"Stop tracking":"Track this session",!armed,()->trackAction.accept(s));track.putClientProperty("focusKey",s.id+":track");track.setEnabled(armed||(localName!=null&&!wrongWorld&&!pinned));if(!armed)actionButtons.add(track);card.add(track);}
+            if(s.can_track||armed){JButton track=button(armed?"Stop tracking":"Track this session",!armed,()->trackAction.accept(s));track.setEnabled(armed||(localName!=null&&!wrongWorld&&!pinned));if(!armed)actionButtons.add(track);card.add(track);}
         }
         if(current&&(s.id.equals(uploadGroup)||s.id.equals(trackedGroup))){JPanel diagnostics=stack();if(s.id.equals(trackedGroup))diagnostics.add(note(detectorText));diagnostics.add(note(startDelivery));diagnostics.add(note(lastDelivery));details.add(disclosure("diagnostics:"+s.id,"Technical diagnostics",diagnostics));}
         if(s.tracking!=null){if(!s.tracking.runs.isEmpty()){SessionSnapshot.Run run=s.tracking.runs.get(0);card.add(note("Run #"+run.sequence+" · "+phaseLabel(run.status)+(run.duration_seconds==null?"":" · "+run.duration_seconds/60+":"+String.format("%02d",run.duration_seconds%60))));}}
@@ -178,7 +176,6 @@ final class LobbykinPanel extends PluginPanel {
     private void disableActions(){for(JButton b:actionButtons)b.setEnabled(false);}
     private void updateDeadlines(){for(Map.Entry<JButton,Instant> entry:offers.entrySet()){long seconds=entry.getValue().getEpochSecond()-Instant.now().getEpochSecond();if(seconds<=0){entry.getKey().setEnabled(false);entry.getKey().setText("Offer expired · refresh");}else if(!Boolean.TRUE.equals(entry.getKey().getClientProperty("decline")))entry.getKey().setText("Accept place ("+seconds+"s)");}}
     private JPanel disclosure(String key,String title,JPanel body){JPanel section=stack();JToggleButton toggle=new JToggleButton();toggle.setBackground(SLATE);toggle.setForeground(new Color(244,242,237));toggle.setBorder(BorderFactory.createEmptyBorder(9,8,9,8));toggle.setFont(UI_FONT.deriveFont(Font.BOLD,13f));boolean open=expanded.contains(key);toggle.setSelected(open);toggle.setText((open?"▾ ":"▸ ")+title);toggle.setHorizontalAlignment(SwingConstants.LEFT);toggle.setFocusPainted(true);body.setVisible(open);toggle.getAccessibleContext().setAccessibleDescription(open?"Expanded":"Collapsed");toggle.addActionListener(e->{boolean visible=toggle.isSelected();if(visible)expanded.add(key);else expanded.remove(key);body.setVisible(visible);toggle.setText((visible?"▾ ":"▸ ")+title);toggle.getAccessibleContext().setAccessibleDescription(visible?"Expanded":"Collapsed");revalidate();repaint();});section.add(toggle);section.add(body);return section;}
-    private static void restoreFocus(Container c,Object key){for(Component child:c.getComponents()){if(child instanceof JComponent&&key.equals(((JComponent)child).getClientProperty("focusKey"))){child.requestFocusInWindow();return;}if(child instanceof Container)restoreFocus((Container)child,key);}}
     private Icon activityIcon(String activity){
         if(activity==null)return null;if(activityIcons.containsKey(activity))return activityIcons.get(activity);
         String file=activity.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]","");java.net.URL url=getClass().getResource("activities/"+file+".png");

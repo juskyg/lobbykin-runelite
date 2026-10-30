@@ -35,6 +35,7 @@ destinations = set()
 for path in sources:
     text = path.read_text()
     assert not re.search(r"new\s+(?:com\.google\.gson\.)?Gson\s*\(", text), f"Use injected RuneLite Gson: {path}"
+    assert not re.search(r"\b(?:KeyboardFocusManager|DefaultKeyboardFocusManager|Robot)\b|\brequestFocus(?:InWindow)?\s*\(", text), f"Input/focus automation is not allowed: {path}"
     # Literal production endpoints only; localhost test overrides are not scanned.
     destinations.update(re.findall(r'https://[^"\s]+', text))
     assert not re.search(r'lk_rl_[0-9a-f]{64}', text), f"Hardcoded credential: {path}"
