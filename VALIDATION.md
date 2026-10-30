@@ -1,48 +1,51 @@
 # Validation — 0.9.4-rc1
 
-Prepared 2026-10-30 from the saved Lobbykin-RuneLite-v0.9.3.zip source package.
-This is a submission-preparation candidate, not a new live-tested game release.
+Updated 2026-10-30. Source based on Lobbykin-RuneLite-v0.9.3.zip.
 
-## Completed in this task
+## GitHub CI: passed
 
-- Compared plugin layout with the official runelite/plugin-hub README, including
-  standard build, metadata, catalog icon, license and marker submission process.
-- Read official Hub runelite.version through GitHub: 1.13.4.
-- Inspected all eleven main Java source files for API boundaries and destinations.
-  No native-code loading, runtime code downloading or Java reflection call was
-  found in this source inspection. This is not a full security audit.
-- Root catalog icon copied byte-for-byte from the existing 48x48 resource.
-- Removed the prebuilt 0.9.3 release JAR from the candidate to avoid shipping a
-  binary whose version differs from the new source.
-- Updated metadata/User-Agent versions; no game detection, hopping, session or
-  authorization logic intentionally changed. All test and resource bytes remain
-  those of 0.9.3. Only BrowserPairing.java and SessionClient.java changed in src,
-  for their User-Agent strings.
-- Checked the available Java runtime: OpenJDK 17 is present, but `javac` and a
-  full JDK are not installed here. A direct subset compile was attempted and
-  could not run; no compilation success is claimed.
-- Ran tools/preflight.py: required-file layout, version consistency, PNG size,
-  source-only packaging, literal endpoint and embedded token checks pass.
-- Checked the final ZIP member list and CRC integrity.
+The public repository import at commit
+`7b06e8c25fb2656e3b013ca6e12c23354972f32e` passed **Build and test**:
+https://github.com/juskyg/lobbykin-runelite/actions/runs/41095181537
 
-## Blocked / not established
+Verified the job and its logs: the submission layout check passed;
+`bash gradlew --no-daemon clean test jar` completed **BUILD SUCCESSFUL**.
+The runner used Temurin JDK 17, Gradle 8.10 and RuneLite 1.13.4.
+Main sources, test sources and resources compiled; the test task and JAR task
+completed. No test count is inferred from the logs.
 
-The full Gradle build was attempted. Wrapper download failed because the
-environment could not reach services.gradle.org; the configured HTTP proxy was
-also unavailable. This environment also lacks a full JDK. No complete build or
-JUnit pass is claimed for this candidate.
-The candidate source and GitHub Actions workflow have now been imported into
-https://github.com/juskyg/lobbykin-runelite at commit
-7b06e8c25fb2656e3b013ca6e12c23354972f32e. CI results must be checked on GitHub;
-the existence of this document does not claim a passing result.
+The original preparation environment lacked a full JDK and could not download
+Gradle. GitHub CI now provides the missing build/test evidence. This does not
+establish live game behavior, backend correctness or official Hub acceptance.
 
-No production write, database migration, authenticated API test, game-client
-test, multiplayer deduplication test or Plugin Hub submission was performed.
-The source repository is public; public source availability is not Hub approval. The backend cross-client matcher is outside this package. See
-SUBMISSION_LT.md for the live release gates and PRIVACY.md for the remaining
-service-side retention/deletion documentation.
+## Packaging and source checks
 
-Official sources checked:
+- Official Plugin Hub README, standard build, metadata, catalog icon, license
+  and marker submission process reviewed. Official Hub runelite.version was
+  1.13.4 when checked on 2026-10-30.
+- Eleven main Java source files inspected for API boundaries and destinations.
+  No native-code loading, runtime executable downloads or Java reflection call
+  found in that source inspection; this is not a full security audit.
+- Root icon copied byte-for-byte from the existing 48x48 resource.
+- Old prebuilt 0.9.3 release JAR excluded to avoid a source/binary mismatch.
+- Version metadata and API User-Agent strings synchronized. Game detection,
+  hopping, session and authorization logic unchanged from 0.9.3; test/resource
+  bytes unchanged. Only BrowserPairing.java and SessionClient.java changed in
+  src, for their User-Agent strings.
+- Offline preflight and ZIP member/CRC checks passed for the preparation package.
+
+## Still required before public Plugin Hub submission
+
+No authenticated production API test, live game-client test or multiplayer
+completion-deduplication test was performed in this preparation task. The
+backend matcher is outside this repository. Validate the scenarios in
+SUBMISSION_LT.md and complete service-side retention/deletion information
+referenced by PRIVACY.md. No production site or database changes were made.
+
+Public source availability and successful CI are not Plugin Hub approval.
+The official RuneLite Plugin Hub PR has not been submitted.
+
+Official references:
 - https://github.com/runelite/plugin-hub/blob/master/README.md
 - https://github.com/runelite/plugin-hub/blob/master/runelite.version
 - https://github.com/runelite/example-plugin/blob/master/build.gradle
