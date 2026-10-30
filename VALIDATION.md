@@ -31,12 +31,14 @@ The full Gradle build was attempted. Wrapper download failed because the
 environment could not reach services.gradle.org; the configured HTTP proxy was
 also unavailable. This environment also lacks a full JDK. No complete build or
 JUnit pass is claimed for this candidate.
-The included GitHub Actions workflow has not run yet. The final archive must be
-compiled and tested in CI before submission.
+The candidate source and GitHub Actions workflow have now been imported into
+https://github.com/juskyg/lobbykin-runelite at commit
+7b06e8c25fb2656e3b013ca6e12c23354972f32e. CI results must be checked on GitHub;
+the existence of this document does not claim a passing result.
 
 No production write, database migration, authenticated API test, game-client
-test, multiplayer deduplication test, GitHub publication or Plugin Hub submission
-was performed. The backend cross-client matcher is outside this package. See
+test, multiplayer deduplication test or Plugin Hub submission was performed.
+The source repository is public; public source availability is not Hub approval. The backend cross-client matcher is outside this package. See
 SUBMISSION_LT.md for the live release gates and PRIVACY.md for the remaining
 service-side retention/deletion documentation.
 

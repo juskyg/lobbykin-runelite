@@ -16,9 +16,11 @@ Tai šaltinio paketas, o ne jau įdiegtas ar patvirtintas Plugin Hub leidimas.
 
 ## 1. Vieša GitHub saugykla
 
-Susikurti naują **Public** saugyklą, siūlomas vardas `lobbykin-runelite`.
-Prisijungusios GitHub paskyros matomuose repo tokios saugyklos nerasta; ji šiuo
-darbu nesukurta. Neskelbti įskiepio nesusijusiame Lineage II projekte.
+Vieša saugykla jau sukurta ir šaltinis įkeltas:
+https://github.com/juskyg/lobbykin-runelite
+Pradinis 66 failų importas: 7b06e8c25fb2656e3b013ca6e12c23354972f32e.
+Toliau esantys įkėlimo punktai palikti tik kaip šaknies struktūros paaiškinimas;
+pakartotinai kurti saugyklos ar kelti ZIP nereikia. Tęsti nuo build ir gyvų testų.
 
 Į naujo repo šaknį įkelti šio aplanko TURINĮ: build.gradle, src, gradle, gradlew,
 runelite-plugin.properties ir kitus failus. Neįkelti viso papildomo aplanko kaip
@@ -107,5 +109,5 @@ Issues naudojami klaidoms, atnaujinimai teikiami nauju `commit=` per Hub PR.
 
 ## Kas šiuo darbu neatlikta
 
-Viešas repo nesukurtas, kodas į GitHub neišsiųstas, oficialus Hub PR nepateiktas,
-gamybinė svetainė ir DB nekeistos. Tai nėra RuneLite/Jagex patvirtinimas.
+Viešas repo sukurtas, šaltinis ir CI workflow įkelti. Oficialus Hub PR dar
+nepateiktas, gamybinė svetainė ir DB nekeistos. Tai nėra RuneLite/Jagex patvirtinimas.
