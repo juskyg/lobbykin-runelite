@@ -50,7 +50,7 @@ reviewers rather than inventing backend guarantees.
 
 - Browser approval, cancel, reconnect and revoke.
 - Optional permissions and Ready synchronization.
-- Explicit world hop and game restrictions.
+- Group world display and wrong-world warnings for raid tracking.
 - Each supported raid/mode: start, local death, exit, interruption and completion.
 - Two clients reporting one completion, retries and delayed events.
 - Two consecutive raids in one session; stopping tracking and disabling plugin.

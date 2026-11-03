@@ -39,8 +39,7 @@ reports. The service owner must document actual server retention and deletion
 arrangements before public release.
 
 Plugin API traffic goes to `https://lobbykin.com/api/runelite/`; explicit browser
-links stay on `https://lobbykin.com/`. API redirects are disabled. RuneLite's
-WorldService obtains its standard world list for explicit Hop actions. RuneLite
+links stay on `https://lobbykin.com/`. API redirects are disabled. RuneLite
 and browser operation generate their own normal network traffic. Hosting
 services receive connection metadata such as IP addresses; their logging is
 outside the plugin's control.

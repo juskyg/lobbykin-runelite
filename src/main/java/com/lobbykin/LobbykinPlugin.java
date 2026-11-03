@@ -16,8 +16,6 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.ActorDeath;
-import net.runelite.client.game.WorldService;
-import net.runelite.client.util.WorldUtil;
 import java.util.concurrent.ScheduledExecutorService;
 import net.runelite.api.ChatMessageType;
 import net.runelite.client.Notifier;
@@ -44,9 +42,7 @@ public class LobbykinPlugin extends Plugin
     @Inject private OkHttpClient http;
     @Inject private Gson gson;
     @Inject private Notifier notifier;
-    @Inject private WorldService worldService;
     @Inject private ScheduledExecutorService executor;
-    private WorldHopController hopper;
     private BrowserPairing pairing;
     private volatile RaidTracker tracker;
     private NotificationPlanner notifications;
@@ -61,7 +57,6 @@ public class LobbykinPlugin extends Plugin
     protected void startUp() throws Exception
     {
         notifications=new NotificationPlanner();
-        hopper=new WorldHopController(client,text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.showHopStatus(text));});
         pairing=new BrowserPairing(http,gson,executor,url->LinkBrowser.browse(url),text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.showPairing(text));},token->{SessionConnection c=connection;if(c!=null)c.connect(token);},text->{LobbykinPanel p=panel;if(p!=null)SwingUtilities.invokeLater(()->p.pairingFailed(text));});
         tracker=new RaidTracker(report->{SessionConnection c=connection;if(c!=null)c.report(report);},text->{
             LobbykinPanel p=panel;RaidTracker t=tracker;
@@ -79,7 +74,7 @@ public class LobbykinPlugin extends Plugin
                 refreshSessions();
             }));
             panel.configurePairCancel(()->{if(pairing!=null)pairing.cancel();});
-            panel.configureV7(()->{if(pairing!=null)pairing.start();},this::hopToWorld);
+            panel.configureBrowserConnection(()->{if(pairing!=null)pairing.start();});
             LobbykinPanel current = panel;
             connection = new SessionConnection(new SessionClient(http,gson), new SessionConnection.View()
             {
@@ -115,7 +110,7 @@ public class LobbykinPlugin extends Plugin
     @Override
     protected void shutDown() throws Exception
     {
-        if(pairing!=null)pairing.cancel();pairing=null;if(hopper!=null)hopper.cancel();
+        if(pairing!=null)pairing.cancel();pairing=null;
         RaidTracker tracking=tracker;if(tracking!=null)tracking.stop(Instant.now());tracker=null;
         SessionConnection active = connection;
         connection = null;
@@ -137,7 +132,6 @@ public class LobbykinPlugin extends Plugin
     public void onGameTick(GameTick event)
     {
         refreshPlayer();
-        if(hopper!=null)hopper.tick();
         RaidTracker t=tracker;Player local=client.getLocalPlayer();
         if(t!=null&&t.selectedRaid()!=null&&client.getGameState()==GameState.LOGGED_IN&&local!=null){
             String raid=t.selectedRaid();boolean inside=insideRaid(raid);int region=templateRegion();
@@ -162,24 +156,12 @@ public class LobbykinPlugin extends Plugin
     @Subscribe
     public void onChatMessage(ChatMessage event){
         if(event.getType()!=ChatMessageType.GAMEMESSAGE&&event.getType()!=ChatMessageType.FRIENDSCHATNOTIFICATION)return;
-        String text=Text.removeTags(event.getMessage());if(hopper!=null)hopper.gameMessage(text);
+        String text=Text.removeTags(event.getMessage());
         RaidTracker t=tracker;if(t!=null){Player local=client.getLocalPlayer();if(local!=null&&t.selectedRaid()!=null)t.context(local.getName(),client.getWorld(),"CoX".equals(t.selectedRaid())?client.getVarbitValue(5432)==1:insideRaid(t.selectedRaid()));t.gameMessage(text,Instant.now());}
     }
 
     @Subscribe
     public void onActorDeath(ActorDeath event){if(event.getActor()==client.getLocalPlayer()){RaidTracker t=tracker;if(t!=null)t.died(Instant.now(),"actor_death");}}
-
-    private void hopToWorld(int id){
-        executor.execute(()->{
-            net.runelite.http.api.worlds.WorldResult worlds=worldService.getWorlds();
-            net.runelite.http.api.worlds.World found=worlds==null?null:worlds.findWorld(id);
-            clientThread.invokeLater(()->{
-                if(hopper==null||panel==null)return;
-                if(found==null){SwingUtilities.invokeLater(()->{if(panel!=null)panel.showHopStatus("World list unavailable. Refresh and try again.");});return;}
-                net.runelite.api.World target=client.createWorld();target.setId(found.getId());target.setAddress(found.getAddress());target.setActivity(found.getActivity());target.setPlayerCount(found.getPlayers());target.setLocation(found.getRegion().getId());target.setTypes(WorldUtil.toWorldTypes(found.getTypes()));hopper.request(target);
-            });
-        });
-    }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event)

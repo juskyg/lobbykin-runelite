@@ -13,7 +13,7 @@ It is not yet published in RuneLite Plugin Hub.
 - One focused Playing now group, roster and Ready / Waiting states.
 - Collapsible scheduled groups, applications and account controls.
 - Browser approval with separate optional permissions.
-- Explicit Hop to world using standard RuneLite world-switching APIs.
+- Group world numbers for switching worlds manually.
 - Session reminders and optional account notifications.
 - Experimental CoX, ToB and ToA start, local death, exit and completion reports.
 
@@ -34,7 +34,7 @@ Until acceptance, this is a development candidate with no Plugin Hub listing.
 1. Open the sidebar and choose **Connect with Lobbykin**.
 2. Sign into Lobbykin in your browser, review and approve your chosen permissions.
 3. Join or host a session on the website. Your own groups appear in the plugin.
-4. Use **Mark ready** and **Hop to** explicitly as needed.
+4. Use **Mark ready** as needed. Switch to the group world in RuneLite.
 5. For raid reports, grant that permission and select **Track this session before
    entering the raid**, on the group's world.
 6. Stop tracking or disconnect when done. Revoke server access from the

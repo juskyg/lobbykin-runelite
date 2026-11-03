@@ -1,8 +1,7 @@
 # Add Lobbykin
 
 Lobbykin is an OSRS group-coordination sidebar. It shows one current party,
-Ready/Waiting roster states, collapsible scheduled groups and an explicit
-Hop to world action. Connected features require a free Lobbykin account.
+Ready/Waiting roster states, collapsible scheduled groups and group world numbers. Connected features require a free Lobbykin account.
 
 Browser approval grants a scoped, revocable credential held only in memory.
 Ready changes, account notifications and experimental raid reports have separate

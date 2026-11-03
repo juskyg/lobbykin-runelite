@@ -29,7 +29,6 @@ final class LobbykinPanel extends PluginPanel {
     private final BiConsumer<String,Boolean> readyAction;
     private BiConsumer<String,Boolean> offerAction=(id,confirm)->{};
     private Consumer<SessionSnapshot.Session> trackAction=session->{};
-    private IntConsumer hopAction=id->{};
     private Runnable browserAction=()->{},browserCancelAction=()->{};
     private boolean pairingPending;
     private final List<JButton> actionButtons=new ArrayList<>();
@@ -65,7 +64,7 @@ final class LobbykinPanel extends PluginPanel {
         sessions.add(note("Your current party will appear here."));
     }
     void configureV6(BiConsumer<String,Boolean> offers,Consumer<SessionSnapshot.Session> tracking){offerAction=offers;trackAction=tracking;}
-    void configureV7(Runnable connect,IntConsumer hop){browserAction=connect;hopAction=hop;}
+    void configureBrowserConnection(Runnable connect){browserAction=connect;}
     void showTrackingStatus(String group,String text){showTrackingStatus(group,text,false);}
     void showTrackingStatus(String group,String text,boolean active){
         boolean changed=!Objects.equals(trackedGroup,group)||!Objects.equals(trackingStatus.getText(),text)||trackingActive!=active;
@@ -78,7 +77,6 @@ final class LobbykinPanel extends PluginPanel {
     }
     void showDetectorStatus(String group,String text){if(!Objects.equals(detectorGroup,group)||!Objects.equals(detectorText,text)){detectorGroup=group;detectorText=text;if(data!=null&&!loading)render();}}
     void showReportStatus(String group,String event,String state){uploadGroup=group;String at=DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault()).format(Instant.now());lastDelivery="Upload: "+event+" · "+state+" · "+at;if("started".equals(event))startDelivery="Start upload: "+state+" · "+at;if("completed".equals(event)&&state.startsWith("ACK")&&Objects.equals(group,trackedGroup)&&trackingStatus.getText().startsWith("Completion signal recorded"))trackingStatus.setText("Raid completed · saved to Lobbykin.");if(data!=null&&!loading)render();}
-    void showHopStatus(String message){connection.setText(message);}
     void configurePairCancel(Runnable cancel){browserCancelAction=cancel;}
     void showPairing(String message){pairingPending=true;connection.setText(message);browserConnect.setText("Cancel connection");browserConnect.setEnabled(true);}
     void pairingFailed(String message){pairingPending=false;connection.setText(message);browserConnect.setText("Connect with Lobbykin");browserConnect.setEnabled(true);}
@@ -128,8 +126,7 @@ final class LobbykinPanel extends PluginPanel {
         JLabel activity=label(value(s.activity)+("—".equals(value(s.session_type))?"":" · "+s.session_type));activity.setForeground(MUTED);activity.setFont(activity.getFont().deriveFont(13f));card.add(activity);
         if(current){JLabel phase=label(phaseLabel(s.raid_phase));phase.setForeground("started".equals(s.raid_phase)?TEAL:YELLOW);phase.setFont(phase.getFont().deriveFont(Font.BOLD,13f));card.add(phase);}
         else card.add(note((s.start_at==null?"Playing now":"Starts "+date(s.start_at))+" · "+value(s.my_status)));
-        JPanel worldRow=new JPanel(new BorderLayout(5,0));worldRow.setOpaque(false);worldRow.add(label("World "+value(s.world)),BorderLayout.WEST);
-        if(s.world!=null&&!pinned){JButton hop=button(localWorld==s.world&&localName!=null?"You are here":"Hop to "+s.world,false,()->hopAction.accept(s.world));hop.setEnabled(localName!=null&&localWorld!=s.world);if(localName!=null&&localWorld!=s.world)actionButtons.add(hop);worldRow.add(hop,BorderLayout.EAST);}card.add(worldRow);
+        card.add(label("World "+value(s.world)));
         if(current&&s.tracking!=null){
             JPanel totals=new JPanel(new VerticalStackLayout(4));totals.setBackground(BACKGROUND);totals.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
             String[] labels={"Deaths","Failed / left","Completed"};String[] values={value(s.tracking.deaths),value(s.tracking.failed_runs),String.valueOf(s.tracking.completed_runs)};
@@ -151,8 +148,8 @@ final class LobbykinPanel extends PluginPanel {
             boolean armed=s.id.equals(trackedGroup),wrongWorld=s.world!=null&&localName!=null&&localWorld!=s.world;
             JTextArea state=note(armed?trackingStatus.getText():s.can_track?"NOT TRACKING · select Track this session before entering the raid.":Arrays.asList("CoX","ToB","ToA").contains(s.activity)?"Raid tracking unavailable · enable Raid reports in Manage access.":"Raid tracking supports CoX, ToB and ToA.");
             state.setForeground(armed?TEAL:YELLOW);card.add(state);
-            if(wrongWorld) {JTextArea warning=note("Wrong world: you are on "+localWorld+". This group uses "+s.world+". Hop first to track this session.");warning.setForeground(YELLOW);card.add(warning);}
-            if(pinned)card.add(note("Session temporarily unavailable. Keeping this active attempt; server confirmation is required. Ready and Hop are disabled."));
+            if(wrongWorld) {JTextArea warning=note("Wrong world: you are on "+localWorld+". This group uses "+s.world+". Switch worlds before tracking this session.");warning.setForeground(YELLOW);card.add(warning);}
+            if(pinned)card.add(note("Session temporarily unavailable. Keeping this active attempt; server confirmation is required. Ready is disabled."));
             if(s.can_track||armed){JButton track=button(armed?"Stop tracking":"Track this session",!armed,()->trackAction.accept(s));track.setEnabled(armed||(localName!=null&&!wrongWorld&&!pinned));if(!armed)actionButtons.add(track);card.add(track);}
         }
         if(current&&(s.id.equals(uploadGroup)||s.id.equals(trackedGroup))){JPanel diagnostics=stack();if(s.id.equals(trackedGroup))diagnostics.add(note(detectorText));diagnostics.add(note(startDelivery));diagnostics.add(note(lastDelivery));details.add(disclosure("diagnostics:"+s.id,"Technical diagnostics",diagnostics));}

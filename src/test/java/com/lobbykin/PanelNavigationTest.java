@@ -10,13 +10,14 @@ public class PanelNavigationTest {
   assertTrue(all(p).stream().anyMatch(c->c instanceof JLabel&&"Ready".equals(((JLabel)c).getText())));assertTrue(all(p).stream().anyMatch(c->c instanceof JLabel&&"Waiting".equals(((JLabel)c).getText())));assertTrue(all(p).stream().anyMatch(c->c instanceof JLabel&&"RAID STARTED".equals(((JLabel)c).getText())));
   toggle.doClick();assertTrue(p.getPreferredSize().height>collapsed);p.showSessions(snapshot(),Instant.now());assertTrue(all(p).stream().filter(c->c instanceof JToggleButton&&((JToggleButton)c).getText().contains("Scheduled (1)")).map(c->(JToggleButton)c).findFirst().get().isSelected());p.dispose();
  });}
- @Test public void hopOnlyFiresOnExplicitClickAndIsDisabledOnCurrentWorld()throws Exception{SwingUtilities.invokeAndWait(()->{
-  java.util.concurrent.atomic.AtomicInteger target=new java.util.concurrent.atomic.AtomicInteger();LobbykinPanel p=new LobbykinPanel(()->{});p.configureV7(()->{},target::set);p.showPlayer("Player",350);p.showSessions(snapshot(),Instant.now());JButton hop=(JButton)all(p).stream().filter(c->c instanceof JButton&&((JButton)c).getText().equals("Hop to 349")).findFirst().get();assertEquals(0,target.get());hop.doClick();assertEquals(349,target.get());p.showPlayer("Player",349);assertFalse(all(p).stream().filter(c->c instanceof JButton&&((JButton)c).getText().equals("You are here")).map(c->(JButton)c).findFirst().get().isEnabled());p.dispose();
+ @Test public void groupWorldIsVisibleWithoutHopButton()throws Exception{SwingUtilities.invokeAndWait(()->{
+  LobbykinPanel p=new LobbykinPanel(()->{});p.showPlayer("Player",350);p.showSessions(snapshot(),Instant.now());
+  assertTrue(all(p).stream().anyMatch(c->c instanceof JLabel&&"World 349".equals(((JLabel)c).getText())));
+  assertFalse(all(p).stream().anyMatch(c->c instanceof JButton&&((JButton)c).getText().startsWith("Hop to ")));p.dispose();
  });}
  @Test public void pendingBrowserConnectionCanBeCanceledWithoutReopeningBrowser()throws Exception{SwingUtilities.invokeAndWait(()->{
-  java.util.concurrent.atomic.AtomicInteger opened=new java.util.concurrent.atomic.AtomicInteger(),canceled=new java.util.concurrent.atomic.AtomicInteger();LobbykinPanel p=new LobbykinPanel(()->{});p.configureV7(opened::incrementAndGet,id->{});p.configurePairCancel(canceled::incrementAndGet);
+  java.util.concurrent.atomic.AtomicInteger opened=new java.util.concurrent.atomic.AtomicInteger(),canceled=new java.util.concurrent.atomic.AtomicInteger();LobbykinPanel p=new LobbykinPanel(()->{});p.configureBrowserConnection(opened::incrementAndGet);p.configurePairCancel(canceled::incrementAndGet);
   JButton button=(JButton)all(p).stream().filter(c->c instanceof JButton&&((JButton)c).getText().equals("Connect with Lobbykin")).findFirst().get();button.doClick();assertEquals(1,opened.get());p.showPairing("Approve Copper Imp");assertEquals("Cancel connection",button.getText());button.doClick();assertEquals(1,canceled.get());assertEquals(1,opened.get());assertEquals("Connect with Lobbykin",button.getText());p.dispose();
  });}
- @Test public void dangerousWorldsAreExcluded(){assertTrue(WorldHopController.safe(EnumSet.of(net.runelite.api.WorldType.MEMBERS)));assertFalse(WorldHopController.safe(EnumSet.of(net.runelite.api.WorldType.PVP)));assertFalse(WorldHopController.safe(EnumSet.of(net.runelite.api.WorldType.HIGH_RISK)));}
  @Test public void futureStartIsScheduledButStartedRaidTakesPriority(){SessionSnapshot.Session s=snapshot().sessions.get(1);assertFalse(LobbykinPanel.playingNow(s,Instant.now()));s.raid_phase="started";assertTrue(LobbykinPanel.playingNow(s,Instant.now()));s.my_status="pending";assertFalse(LobbykinPanel.playingNow(s,Instant.now()));}
 }

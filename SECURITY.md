@@ -17,7 +17,7 @@ Raid start is based on supported game-system signals and entry-state observation
 
 Validated events update a phase and bounded lease: active heartbeats extend five minutes, capped at six hours from an observed attempt start; completion grants up to fifteen minutes for the next attempt. This keeps genuinely tracked play visible past the nominal session deadline without retaining abandoned sessions forever. Group closure/cancellation still wins. Ordinary group edits cannot directly set derived phase/lease fields.
 
-Hop-to is one explicit user action using RuneLite's world service and the game's world switcher. The plugin never hops automatically, bypasses game restrictions or suppresses game warnings. It excludes dangerous/special worlds, offline/full worlds and instanced areas. Requests are bounded to three interface-opening attempts within ten seconds.
+The plugin displays the group world. Players switch worlds using the game client.
 
 Network calls are serialized/time-bounded, private responses are no-store, redirects are not followed and response/request sizes are bounded. The in-memory report queue retries transient failures with stable attempt IDs; stale reports expire after 9.5 minutes. Revocation discards local state. Reports interrupted by shutdown can be lost, causing stale/interrupted tracking rather than completion.
 
